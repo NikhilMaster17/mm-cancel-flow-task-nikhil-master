@@ -3,7 +3,76 @@
 ## Overview
 
 Convert an existing Figma design into a fully-functional subscription-cancellation flow for Migrate Mate. This challenge tests your ability to implement pixel-perfect UI, handle complex business logic, and maintain security best practices.
+# Cancellation Flow & User Profile Page
 
+This is a complete React application that implements a user profile page and a detailed, multi-step subscription cancellation flow. The cancellation flow is designed to capture user feedback and includes A/B test logic to present a downsell offer to a specific segment of users.
+
+-----
+
+## 🚀 Features
+
+  * **User Profile Page**: Displays basic user and subscription information (email, subscription status, next payment date).
+  * **Multi-Step Cancellation Flow**: A modal-based stepper that guides the user through the cancellation process.
+      * **Step 1**: Confirmation
+      * **Step 2**: Reason for cancellation
+      * **Step 3**: Conditional follow-up questions based on the selected reason (e.g., job search success, pricing feedback, technical issues).
+      * **Step 4**: A/B tested downsell offer (e.g., "pause your subscription").
+      * **Step 5**: Final confirmation and thank you message.
+  * **A/B Test Logic**: Randomly assigns users to a variant (A or B) and adjusts the cancellation flow accordingly. Variant B users are presented with a downsell offer after selecting a specific cancellation reason ("I haven't found a job yet").
+  * **State Management**: Uses React's `useState` hook to manage the UI state, including the active step, selected reasons, and form data.
+  * **UI Components**: Includes a simple, reusable `Button` component with different styling variants.
+  * **Mock Data**: Uses mock data for user and subscription information, making it easy to run and test the UI without a backend connection.
+
+-----
+
+## 🛠️ Technology Stack
+
+  * **React**: The primary JavaScript library for building the user interface.
+  * **Tailwind CSS**: (Implied by the class names in the code) A utility-first CSS framework for styling the components.
+
+-----
+
+## 📦 How to Run Locally
+
+Since this is a single-file React component, you can integrate it into an existing React project.
+
+1.  **Clone the repository** (if applicable) or **copy the file** into your React project's `src` folder.
+
+2.  **Ensure you have the necessary dependencies**. If you are using a new project, you may need to install React. The styling is based on Tailwind CSS, so you will need to have it set up in your project to see the intended design.
+
+3.  **Run your development server**:
+
+    ```bash
+    npm start
+    # or
+    yarn start
+    ```
+
+4.  **View the app**: Open your browser and navigate to `http://localhost:3000` (or the port specified by your development server). The application will display the user profile page, and you can click the "Cancel Migrate Mate" button to initiate the cancellation flow.
+
+-----
+
+## 🧩 Code Structure
+
+  * **`Button` Component**: A basic, reusable component for styled buttons.
+  * **`mockUser` & `mockSubscriptionData`**: Objects containing hardcoded data for demonstration purposes. In a production environment, this data would be fetched from an API or a database like **Supabase**.
+  * **`App` Component**: The main component that orchestrates the entire application. It manages all state and conditionally renders the different sections of the UI.
+  * **`handleStartCancelFlow`**: Initializes the cancellation flow and assigns the A/B test variant.
+  * **`handleCloseCancelFlow`**: Resets the state to close the modal and prepare for a new session.
+  * **`handleFinalizeCancellation`**: A mock function that logs the final cancellation data. This is where an API call to a backend (like a **Supabase** table) would be made to persist the data.
+  * **`renderStepX` Functions**: Helper functions to render the UI for each step of the cancellation modal.
+  * **`renderFlowStep`**: A switch statement that determines which step to display inside the modal.
+
+-----
+
+## 📝 A Note on Production Use
+
+This component is a great starting point, but it's important to consider a few things before using it in a production application:
+
+  * **Backend Integration**: The `handleFinalizeCancellation` function is currently a mock. You must implement the logic to securely send the `cancellationData` to your backend or a service like **Supabase**.
+  * **A/B Test Persistence**: The A/B test variant (`abVariant`) is currently assigned randomly on each new session. To ensure a consistent user experience, the variant should be stored in your user's database record (or local storage) after the initial assignment.
+  * **Error Handling**: Add robust error handling for API calls to gracefully manage network issues or server errors.
+  * **Authentication**: The current app uses a mock user. You will need to integrate it with your actual authentication system to ensure the correct user is logged in and their data is displayed.
 ## Objective
 
 Implement the Figma-designed cancellation journey exactly on mobile + desktop, persist outcomes securely, and instrument the A/B downsell logic.
@@ -28,102 +97,3 @@ This repository contains:
 > 2. Persists to a Postgres-compatible database
 > 3. Enforces table-level security
 
-## Must-Have Features
-
-### 1. Progressive Flow (Figma Design)
-- Implement the exact cancellation journey from provided Figma
-- Ensure pixel-perfect fidelity on both mobile and desktop
-- Handle all user interactions and state transitions
-
-### 2. Deterministic A/B Testing (50/50 Split)
-- **On first entry**: Assign variant via cryptographically secure RNG
-- **Persist** variant to `cancellations.downsell_variant` field
-- **Reuse** variant on repeat visits (never re-randomize)
-
-**Variant A**: No downsell screen
-**Variant B**: Show "$10 off" offer
-- Price $25 → $15, Price $29 → $19
-- **Accept** → Log action, take user back to profile page (NO ACTUAL PAYMENT PROCESSING REQUIRED)
-- **Decline** → Continue to reason selection in flow
-
-### 3. Data Persistence
-- Mark subscription as `pending_cancellation` in database
-- Create cancellation record with:
-  - `user_id`
-  - `downsell_variant` (A or B)
-  - `reason` (from user selection)
-  - `accepted_downsell` (boolean)
-  - `created_at` (timestamp)
-
-### 4. Security Requirements
-- **Row-Level Security (RLS)** policies
-- **Input validation** on all user inputs
-- **CSRF/XSS protection**
-- Secure handling of sensitive data
-
-### 5. Reproducible Setup
-- `npm run db:setup` creates schema and seed data (local development)
-- Clear documentation for environment setup
-
-## Out of Scope
-
-- **Payment processing** - Stub with comments only
-- **User authentication** - Use mock user data
-- **Email notifications** - Not required
-- **Analytics tracking** - Focus on core functionality
-
-## Getting Started
-
-1. **Clone this repository** `git clone [repo]`
-2. **Install dependencies**: `npm install`
-3. **Set up local database**: `npm run db:setup`
-4. **Start development**: `npm run dev`
-
-## Database Schema
-
-The `seed.sql` file provides a **starting point** with:
-- `users` table with sample users
-- `subscriptions` table with $25 and $29 plans
-- `cancellations` table (minimal structure - **you'll need to expand this**)
-- Basic RLS policies (enhance as needed)
-
-### Important: Schema Design Required
-
-The current `cancellations` table is intentionally minimal. You'll need to:
-- **Analyze the cancellation flow requirements** from the Figma design
-- **Design appropriate table structure(s)** to capture all necessary data
-- **Consider data validation, constraints, and relationships**
-- **Ensure the schema supports the A/B testing requirements**
-
-## Evaluation Criteria
-
-- **Functionality (40%)**: Feature completeness and correctness
-- **Code Quality (25%)**: Clean, maintainable, well-structured code
-- **Pixel/UX Fidelity (15%)**: Accuracy to Figma design
-- **Security (10%)**: Proper RLS, validation, and protection
-- **Documentation (10%)**: Clear README and code comments
-
-## Deliverables
-
-1. **Working implementation** in this repository
-2. **NEW One-page README.md (replace this)** (≤600 words) explaining:
-   - Architecture decisions
-   - Security implementation
-   - A/B testing approach
-3. **Clean commit history** with meaningful messages
-
-## Timeline
-
-Submit your solution within **72 hours** of receiving this repository.
-
-## AI Tooling
-
-Using Cursor, ChatGPT, Copilot, etc. is **encouraged**. Use whatever accelerates your development—just ensure you understand the code and it runs correctly.
-
-## Questions?
-
-Review the challenge requirements carefully. If you have questions about specific implementation details, make reasonable assumptions and document them in your README.
-
----
-
-**Good luck!** We're excited to see your implementation.
