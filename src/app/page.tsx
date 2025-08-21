@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 // The import for the supabase client has been removed to fix the compilation error.
 // The "supabase" client is already available in the execution environment.
 
@@ -15,9 +15,15 @@ import React, { useState } from 'react';
  * @param {string} [props.variant='primary'] - The button variant ('primary' or 'secondary').
  * @param {function} props.onClick - The click handler function.
  */
-const Button = ({ children, variant = 'primary', disabled = false, onClick }) => {
+interface ButtonPropsInfo {
+  children: ReactNode;
+  variant: string;
+  disabled?: boolean;
+  onClick?: () => void;  
+}
+const Button: React.FC<any> = ({ children, variant = 'primary', disabled = false, onClick }) => {
   const baseClasses = "w-full py-3 px-6 font-semibold text-center transition-colors rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2";
-  const variants = {
+  const variants: any = {
     primary: "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500",
     secondary: "bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-400",
     danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
@@ -59,9 +65,9 @@ export default function App() {
   // State for the cancellation flow
   const [showCancelFlow, setShowCancelFlow] = useState(false);
   const [step, setStep] = useState(1);
-  const [selectedReason, setSelectedReason] = useState(null);
+  const [selectedReason, setSelectedReason] = useState('');
   const [abVariant, setAbVariant] = useState(null);
-  const [downsellAccepted, setDownsellAccepted] = useState(null);
+  const [downsellAccepted, setDownsellAccepted] = useState(false);
   const [cancellationData, setCancellationData] = useState({
     cancel_reason: null,
     job_found_through_us: null,
@@ -90,7 +96,7 @@ export default function App() {
 
   const handleStartCancelFlow = () => {
     // Assign the A/B test variant when the flow starts
-    const variant = assignAbVariant();
+    const variant: any = assignAbVariant();
     setAbVariant(variant);
     setCancellationData(prev => ({ ...prev, ab_variant: variant }));
     setShowCancelFlow(true);
@@ -100,8 +106,8 @@ export default function App() {
   const handleCloseCancelFlow = () => {
     setShowCancelFlow(false);
     setStep(1);
-    setSelectedReason(null);
-    setDownsellAccepted(null);
+    setSelectedReason('');
+    setDownsellAccepted(false);
     // Reset the data for a new session
     setCancellationData({
       cancel_reason: null,
@@ -183,7 +189,7 @@ export default function App() {
               checked={selectedReason === reason}
               onChange={() => {
                 setSelectedReason(reason);
-                setCancellationData(prev => ({ ...prev, cancel_reason: reason.toLowerCase().replace(/[\s\W]+/g, '_') }));
+                setCancellationData(((prev: any) => ({ ...prev, cancel_reason: reason.toLowerCase().replace(/[\s\W]+/g, '_') })));
 
                 // This is the core logic fix: conditional navigation happens here.
                 if (reason === 'I haven’t found a job yet') {
